@@ -1,5 +1,6 @@
-#pragma once
+#define LOGGING
 
+#include "Logs.h"
 #include <malloc.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -82,12 +83,7 @@ struct stack_t
     #endif
 };
 
-#define DUMP_ERR(name, code) name = code,
-enum ErrorCodes
-{
-    #include "errors.h"
-};
-#undef DUMP_ERR
+const int POISON = 0x42;
 
 uint64_t StackDump (stack_t *stk, uint64_t err, const char *called_from, const int line_called_from);
 

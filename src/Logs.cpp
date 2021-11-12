@@ -1,5 +1,5 @@
 #ifdef LOGGING
-    static int OpenLogFile ()
+    int OpenLogFile ()
     {
         Log_file = fopen ("ListLog.html", "w");
         if (!Log_file)
@@ -40,7 +40,7 @@
         return OK;
     }
 
-    static int CloseLogFile ()
+    int CloseLogFile ()
     {
         if (Log_file)
         {

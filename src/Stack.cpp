@@ -1,9 +1,6 @@
 #include "Stack.h"
-#include "Logs.h"
 
 const int BUFFER_INIT_SIZE = 1;
-
-FILE* Log_file = NULL;
 
 const char *_type_name = "double";
 
@@ -11,7 +8,6 @@ const char *_type_name = "double";
     const uint64_t CANARY_VAL = 0xC0DEDEADC0DEDEAD;
 #endif
 
-const int POISON    = 0x42;
 uint64_t  Stack_Err = 0;
 
 uint64_t StackInit_ (stack_t *stk

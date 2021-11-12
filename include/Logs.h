@@ -1,17 +1,20 @@
+#pragma once
+
 #include <stdio.h>
-#include "Stack.h"
+
+#define DUMP_ERR(name, code) name = code,
+enum ErrorCodes
+{
+    #include "errors.h"
+};
+#undef DUMP_ERR
 
 #ifdef LOGGING
-    static int OpenLogFile ();
-    static int CloseLogFile ();
-    static FILE *Log_file   = NULL;
+    int OpenLogFile ();
+    int CloseLogFile ();
+    static FILE *Log_file = NULL;
 
     #define Log_Output Log_file
-    #define DUMP_ERR(name, code)                                                \
-        if (err & code)                                                         \
-        {                                                                       \
-            LOG_ERROR (name\n);                                                 \
-        }
 #else
     #define Log_Output stderr
 #endif
@@ -20,4 +23,4 @@
             fprintf (Log_Output, "%s: ERROR: " #string "\n",                \
                                  __FUNCTION__ __VA_ARGS__)
 
-#define LOG_FATAL(string) fprintf (Log_Output, "FATAL: " string)
+#define LOG_FATAL(string, ...) fprintf (Log_Output, "FATAL: " #string __VA_ARGS__)
