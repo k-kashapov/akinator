@@ -3,3 +3,6 @@ all:
 
 basic:
 	g++ main.cpp src/*.cpp -I include/ -o akin.exe
+
+.o:
+	g++ main.cpp src/*.cpp -I include/ -c

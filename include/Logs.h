@@ -1,5 +1,4 @@
 #pragma once
-
 #include <stdio.h>
 
 #define DUMP_ERR(name, code) name = code,
@@ -10,17 +9,13 @@ enum ErrorCodes
 #undef DUMP_ERR
 
 #ifdef LOGGING
-    int OpenLogFile ();
-    int CloseLogFile ();
-    static FILE *Log_file = NULL;
-
-    #define Log_Output Log_file
-#else
-    #define Log_Output stderr
+    int OpenLogFile (FILE **file_ptr);
+    int CloseLogFile (FILE **file_ptr);
+    static FILE *Log_file = stderr;
 #endif
 
-#define LOG_ERROR(string, ...)                                              \
-            fprintf (Log_Output, "%s: ERROR: " #string "\n",                \
+#define LOG_ERROR(string, ...)                                                  \
+            fprintf (Log_file, "%s: ERROR: " string "\n",                       \
                                  __FUNCTION__ __VA_ARGS__)
 
-#define LOG_FATAL(string, ...) fprintf (Log_Output, "FATAL: " #string __VA_ARGS__)
+#define LOG_FATAL(string, ...) fprintf (Log_file, "FATAL: " string __VA_ARGS__)

@@ -1,12 +1,10 @@
-#define LOGGING
-
-#include "Logs.h"
 #include <malloc.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
+#include "Logs.h"
 
 typedef const char* tree_elem;
 #define TYPE_SPEC "%s"

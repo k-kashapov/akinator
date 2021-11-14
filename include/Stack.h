@@ -1,14 +1,11 @@
-#define LOGGING
-
-#include "Logs.h"
 #include <malloc.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
+#include "Logs.h"
 
-#define DEBUG_INFO
+//#define DEBUG_INFO
 #define CANARY_PROTECTION
 #define CHECK_POISON
 #define HASH_PROTECTION
@@ -41,7 +38,7 @@ typedef int64_t type_t;
         unsigned long len = sizeof (*stk) - sizeof (stk->struct_hash) - sizeof (stk->data_hash); \
         res = MurmurHash (stk, len);
 
-    #define COUNT_DATA_HASH(stk, res)                                               \
+    #define COUNT_DATA_HASH(stk, res)                                                \
         res = MurmurHash (stk->buffer, (unsigned long) stk->size * sizeof (type_t));
 #endif
 

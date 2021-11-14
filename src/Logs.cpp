@@ -1,14 +1,17 @@
+#define LOGGING
+#include "Logs.h"
+
 #ifdef LOGGING
-    int OpenLogFile ()
+    int OpenLogFile (FILE **file_ptr)
     {
-        Log_file = fopen ("ListLog.html", "w");
-        if (!Log_file)
+        *file_ptr = fopen ("Log.html", "w");
+        if (!*file_ptr)
         {
             printf ("OPENING LOG FILE FAILED\n");
             return OPEN_FILE_FAIL;
         }
 
-        fprintf (Log_file, "<style>\
+        fprintf (*file_ptr, "<style>\
                             table, th, td\
                             {\
                                 border:1px solid black;\
@@ -40,13 +43,13 @@
         return OK;
     }
 
-    int CloseLogFile ()
+    int CloseLogFile (FILE **file_ptr)
     {
-        if (Log_file)
+        if (file_ptr)
         {
-            fprintf (Log_file, "</pre></body>");
-            fclose (Log_file);
-            Log_file = NULL;
+            fprintf (*file_ptr, "</pre></body>");
+            fclose (*file_ptr);
+            *file_ptr = NULL;
         }
 
         return OK;

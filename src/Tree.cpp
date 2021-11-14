@@ -1,3 +1,4 @@
+#define LOGGING
 #include "Tree.h"
 
 const int POISON = 0x42;
@@ -7,15 +8,16 @@ Tree *CreateTree (tree_elem value)
     Tree *tree = (Tree*) calloc (1, sizeof (Tree));
     if (!tree)
     {
-        LOG_ERROR (OPEN_FILE_FAIL\n);
+        LOG_ERROR ("OPEN_FILE_FAIL\n");
     }
 
     TNode *init_node = CreateNode (value);
     tree->root = init_node;
 
     tree->size = 1;
-
-    OpenLogFile ();
+    #ifdef LOGGING
+        OpenLogFile (&Log_file);
+    #endif
 
     return tree;
 }
@@ -30,7 +32,7 @@ TNode *CreateNode (tree_elem value)
     TNode *node_ptr = (TNode *) calloc (1, sizeof (TNode));
     if (!node_ptr)
     {
-        LOG_FATAL (MEM_ALLOC_ERR\n);
+        LOG_FATAL ("MEM_ALLOC_ERR\n");
     }
 
     node_ptr->data = value;
@@ -101,8 +103,8 @@ int64_t NodeOk (TNode *node)
     {
         if (node->left || node->right)
         {
-            LOG_ERROR (LR_NOT_SAME\nnode: data: TYPE_SPEC\n,
-                       , node->data);
+            LOG_ERROR ("LR_NOT_SAME\nnode: %p data: " TYPE_SPEC "\n",
+                       , node, node->data);
             err |= LR_NOT_SAME;
         }
     }
@@ -133,7 +135,8 @@ int DestructTree (Tree *tree)
     DestructNode (GetRoot (tree));
     free (tree);
 
-    CloseLogFile ();
-
+    #ifdef LOGGING
+        CloseLogFile (&Log_file);
+    #endif
     return 0;
 }

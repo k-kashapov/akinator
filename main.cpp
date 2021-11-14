@@ -1,3 +1,4 @@
+#define LOGGING
 #include "Tree.h"
 #include "Stack.h"
 

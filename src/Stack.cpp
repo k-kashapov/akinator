@@ -1,3 +1,4 @@
+#define LOGGING
 #include "Stack.h"
 
 const int BUFFER_INIT_SIZE = 1;
