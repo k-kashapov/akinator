@@ -18,4 +18,7 @@ enum ErrorCodes
             fprintf (Log_file, "%s: ERROR: " string "\n",                       \
                                  __FUNCTION__ __VA_ARGS__)
 
+#define LOG_PRINT(string, ...)                                                  \
+            fprintf (Log_file, string "\n", __VA_ARGS__)
+
 #define LOG_FATAL(string, ...) fprintf (Log_file, "FATAL: " string __VA_ARGS__)

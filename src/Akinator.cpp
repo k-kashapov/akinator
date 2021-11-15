@@ -1,5 +1,33 @@
 #include "Akinator.h"
 
+int GetArgs (int argc, const char **argv, Config *curr_config)
+{
+    while (--argc > 0)
+    {
+        argv++;
+
+        if (!strncmp (*argv, "-i", 3))
+        {
+            curr_config->input_file = *(++argv);
+            argc--;
+        }
+        else if (!strncmp (*argv, "-o", 3))
+        {
+            curr_config->output_file = *(++argv);
+            argc--;
+        }
+        else if (!strncmp (*argv, "--Dot", 6))
+        {
+            curr_config->settings |= DOT_IMG;
+        }
+        else if (!strncmp (*argv, "--Save", 7))
+        {
+            curr_config->settings |= UPDATE_BASE;
+        }
+    }
+    return 0;
+}
+
 static FILE *OpenGraphFile (const char *name)
 {
     FILE *file_ptr = fopen (name, "w");
@@ -57,7 +85,7 @@ int BuildTreeFromFile (Tree *tree, File_info *file)
 
 int CreateQuestion (TNode *destination, File_info *file, int *curr_line, FILE *Graph_file)
 {
-    printf ("VVV\nЧитаем строчку: ");
+    printf ("\u25BC\u25BC\u25BC\nЧитаем строчку: ");
     String str = *file->strs[(*curr_line)++];
     printf ("%s\n", str.text);
     destination->data = str.text;
@@ -79,8 +107,92 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line, FILE *G
         PrintNodeDot (Graph_file, destination);
     }
 
-    printf ("Построение закончено (%s)\n^^^\n", str.text);
-
+    printf ("Построение закончено (%s)\n\u25B2\u25B2\u25B2\n", str.text);
 
     return OK;
+}
+
+char *GetUserInput (void)
+{
+    char *user_input = (char *) calloc (MAX_USER_INPUT, sizeof (char));
+    fgets (user_input, MAX_USER_INPUT, stdin);
+    if (user_input[MAX_USER_INPUT - 2] != '\0')
+    {
+        while (getchar() != '\n') ;
+    }
+
+    return user_input;
+}
+
+char UserAgrees (void)
+{
+    char *input = GetUserInput();
+    char agrees = *input == 'y';
+    free (input);
+
+    return agrees;
+}
+
+int Guess (Tree *tree)
+{
+    assert (tree);
+
+    printf ("Let's dance!\n");
+    for (TNode *curr = GetRoot (tree); curr;)
+    {
+        printf ("Это %s\n", curr->data);
+        char agrees = UserAgrees();
+        if (agrees)
+        {
+            if (curr->left)
+            {
+                curr = curr->left;
+            }
+            else
+            {
+                printf ("Очев\n");
+                break;
+            }
+        }
+        else
+        {
+            if (curr->right)
+            {
+                curr = curr->right;
+            }
+            else
+            {
+                printf ("Тогда не знаю\n");
+                break;
+            }
+        }
+    }
+
+    return OK;
+}
+
+void SaveBase (Config *config, Tree *tree)
+{
+    int stdout_old = fileno (stdout);
+    freopen (config->output_file, "wt", stdout);
+
+    VisitNodePre (GetRoot (tree), PrintDataToFile);
+    fclose (stdout);
+
+    stdout = fdopen (stdout_old, "wt");
+
+    return;
+}
+
+void PrintDataToFile (TNode *node)
+{
+    fprintf (stdout, "%s\n", node->data);
+    return;
+}
+
+void CreateImg (void)
+{
+    system ("dot dotInput.dot -Tpng -o Tree.png");
+    system ("eog Tree.png");
+    return;
 }

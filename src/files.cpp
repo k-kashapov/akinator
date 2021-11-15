@@ -4,26 +4,6 @@
  *********************************************************************/
 #include "files.h"
 
-int get_io_args (int argc, const char **argv, Config *curr_config)
-{
-  while (--argc > 0)
-  {
-    argv++;
-
-    if (!strncmp (*argv, "-i", 3))
-    {
-      curr_config->input_file = *(++argv);
-      argc--;
-    }
-    else if (!strncmp (*argv, "-o", 3))
-    {
-      curr_config->output_file = *(++argv);
-      argc--;
-    }
-  }
-  return 0;
-}
-
 long int read_all_lines (File_info *info, const char* file_name)
 {
     assert (info);
@@ -147,21 +127,4 @@ void free_info (File_info *info)
     free (info->text);
     free (info->strs);
     free (info->strs_buff);
-}
-
-void get_params (int argc, const char **argv, Config *current)
-{
-    assert (argv);
-    assert (current);
-
-    while (--argc && 0) // TODO arguments
-    {
-        const char* arg = *++argv;
-        if (!strncmp (arg, "<", 1))
-        {
-            current->input_file = *++argv;
-            argc--;
-        }
-
-    }
 }

@@ -19,6 +19,8 @@ Tree *CreateTree (tree_elem value)
         OpenLogFile (&Log_file);
     #endif
 
+    TreeOk (tree);
+
     return tree;
 }
 
@@ -66,7 +68,6 @@ void TreeNodePrint (TNode *node)
 
 TNode *VisitNodePre (TNode *node, void (*action) (TNode *))
 {
-    printf ("(");
     if (!node) return 0;
     action (node);
     if (node->left)
@@ -79,7 +80,6 @@ TNode *VisitNodePre (TNode *node, void (*action) (TNode *))
         VisitNodePre (node->right, action);
     }
 
-    printf (")");
     return 0;
 }
 
@@ -95,6 +95,11 @@ int64_t TreeOk (Tree *tree)
 int64_t NodeOk (TNode *node)
 {
     int64_t err = 0;
+    if (!node->data)
+    {
+        LOG_ERROR ("BAD DATA PTR at %p\n", , node);
+        err |= BAD_PTR;
+    }
 
     if (node->left && node->right)
     {

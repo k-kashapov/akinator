@@ -1,24 +1,38 @@
+#define LOGGING
 #include "Akinator.h"
 
 int main (int argc, const char **argv)
 {
-    Config io_config = {};
+    Config config = {};
     File_info info = {};
 
-    get_io_args (argc, argv, &io_config);
+    GetArgs (argc, argv, &config);
 
-    long lines_num = read_all_lines (&info, io_config.input_file);
+    long lines_num = read_all_lines (&info, config.input_file);
+    if (lines_num < 1)
+    {
+        LOG_ERROR ("ZERO LINES READ\n");
+        return OPEN_FILE_FAILED;
+    }
 
     Tree *tree = CreateTree ("Unknown");
 
     BuildTreeFromFile (tree, &info);
-    VisitNodePre (GetRoot (tree), TreeNodePrint);
-    putc ('\n', stdout);
+
+    Guess (tree);
+
+    if (config.settings & UPDATE_BASE)
+    {
+        SaveBase (&config, tree);
+    }
 
     DestructTree (tree);
     free_info (&info);
 
-    system ("dot dotInput.dot  -Tpng -o Img.png");
+    if (config.settings & DOT_IMG)
+    {
+        CreateImg();
+    }
 
     return 0;
 }

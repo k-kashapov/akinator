@@ -18,6 +18,13 @@ enum FilesExitCodes
   OPEN_FILE_FAILED =    -3
 };
 
+enum Settings
+{
+    DOT_IMG     = 0x001,
+    UPDATE_BASE = 0X002,
+
+};
+
 /**
  * \brief Структура, содержащая строку и её длину
  */
@@ -32,13 +39,12 @@ struct String
  *
  * \param input_file  Имя файла, откуда производится чтение
  * \param output_file Имя файла для записи
- * \param mode        Режим сортировки строк
- * \param reverse     bool Сортировать строки по их окончанию
  */
 struct Config
 {
-    const char *input_file  = "source.txt";
-    const char *output_file = "code.asm";
+    const char *input_file  = "base.txt";
+    const char *output_file = "base_new.txt";
+    int64_t     settings    = 0;
 };
 
 /**
@@ -100,14 +106,3 @@ int show_res (File_info *source, const char * output_file);
  * \param info Структура, память которой будет очищена
  */
 void free_info (File_info *info);
-
-/**
- * \brief Получает список аргументов программы. Аргументы задают имена входного и выходного файлов
- *
- * \param argc    Количество аргументов программы
- * \param argv    Массив аргументов
- * \param current Структура, хранящая имена файлов
- */
-void get_params (int argc, const char **argv, Config *current);
-
-int get_io_args (int argc, const char **argv, Config *curr_config);
