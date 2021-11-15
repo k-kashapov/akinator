@@ -1,0 +1,31 @@
+digraph
+{
+rankdir = "TB";
+splines = false;
+NODE0x603000000010[shape=rectangle, style = "rounded,filled", fillcolor="lightblue", label = "Животное?"]
+NODE0x603000000040[shape=rectangle, style = "rounded,filled", fillcolor="lightblue", label = "Живёт на болоте?"]
+NODE0x6030000000a0[shape=rectangle, style = "rounded,filled", fillcolor="lightblue", label = "Чёрное?"]
+NODE0x603000000100[shape=rectangle, style = "rounded,filled", fillcolor="lightblue", label = "Млекопитающее?"]
+NODE0x603000000160[shape=rectangle, style = "rounded,filled", fillcolor="lightblue", label = "Сферическое?"]
+NODE0x6030000001c0[shape=rectangle, style = "rounded,filled", fillcolor="lightblue", label = "В вакууме?"]
+NODE0x603000000220[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Конь"]
+NODE0x603000000250[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Ну тогда не знаю"]
+NODE0x6030000001c0:sw->NODE0x603000000220:n [label = "Да"]
+NODE0x6030000001c0:se->NODE0x603000000250:n [label = "Нет"]
+NODE0x6030000001f0[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Ну тогда не знаю"]
+NODE0x603000000160:sw->NODE0x6030000001c0:n [label = "Да"]
+NODE0x603000000160:se->NODE0x6030000001f0:n [label = "Нет"]
+NODE0x603000000190[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Ну тогда не знаю"]
+NODE0x603000000100:sw->NODE0x603000000160:n [label = "Да"]
+NODE0x603000000100:se->NODE0x603000000190:n [label = "Нет"]
+NODE0x603000000130[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Ну тогда не знаю"]
+NODE0x6030000000a0:sw->NODE0x603000000100:n [label = "Да"]
+NODE0x6030000000a0:se->NODE0x603000000130:n [label = "Нет"]
+NODE0x6030000000d0[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Ну тогда не знаю"]
+NODE0x603000000040:sw->NODE0x6030000000a0:n [label = "Да"]
+NODE0x603000000040:se->NODE0x6030000000d0:n [label = "Нет"]
+NODE0x603000000070[shape=rectangle, style = "rounded,filled", fillcolor="lime", label = "Ну тогда не знаю"]
+NODE0x603000000010:sw->NODE0x603000000040:n [label = "Да"]
+NODE0x603000000010:se->NODE0x603000000070:n [label = "Нет"]
+
+}

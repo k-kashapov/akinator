@@ -4,25 +4,37 @@
  *********************************************************************/
 #include "files.h"
 
+int get_io_args (int argc, const char **argv, Config *curr_config)
+{
+  while (--argc > 0)
+  {
+    argv++;
+
+    if (!strncmp (*argv, "-i", 3))
+    {
+      curr_config->input_file = *(++argv);
+      argc--;
+    }
+    else if (!strncmp (*argv, "-o", 3))
+    {
+      curr_config->output_file = *(++argv);
+      argc--;
+    }
+  }
+  return 0;
+}
+
 long int read_all_lines (File_info *info, const char* file_name)
 {
     assert (info);
     assert (file_name);
 
-    FILE *source = NULL;
-    if (open_file (&source, file_name, "rt"))  // rt rt rt!!!
-    {
-        return OPEN_FILE_FAILED;
-    }
-
-    char *text_buff = read_to_end (source);
+    char *text_buff = read_file (file_name);
 
     if (text_buff == NULL)
     {
         return READ_TEXT_FAILED;
     }
-
-    fclose (source);
 
     String **strings = (String **) calloc (BUFF_SIZE + 1, sizeof (String *));
     assert (strings);
@@ -40,7 +52,7 @@ long int read_all_lines (File_info *info, const char* file_name)
 
     for (char *token = strtok (text_buff, "\n\r"); token; token = strtok (NULL, "\n\r"))
     {
-      while (*token == ' ') token++;
+      while (isspace(*token)) token++;
       char *token_ptr = token;
       while (*token_ptr != '\n' && *token_ptr) token_ptr++;
       (*strings_ptr)->len = token_ptr - token;
@@ -55,19 +67,23 @@ long int read_all_lines (File_info *info, const char* file_name)
     return info->lines_num;
 }
 
-int open_file (FILE **ptr, const char* file_name, const char* mode)
+char *read_file (const char *file_name)
 {
-    *ptr = fopen (file_name, mode);
-    if (!ptr)
+    FILE *source = fopen (file_name, "rt");
+    if (!source)
     {
         printf ("ERROR: Couldn't open file \"%s\"\n", file_name);
-        return (OPEN_FILE_FAILED);
+        return NULL;
     }
 
-    return 0;
+    char *text = read_to_end (source);
+
+    fclose (source);
+
+    return text;
 }
 
-char* read_to_end (FILE *source)
+char *read_to_end (FILE *source)
 {
     assert (source);
 
@@ -102,12 +118,11 @@ long unsigned int get_len (FILE *file)
     return (unsigned long int)length;
 }
 
-int show_res (File_info *file_text, const char * output_file)
+int show_res (File_info *file_text, const char *output_file)
 {
     assert (file_text);
 
-    FILE *destination = NULL;
-    open_file (&destination, output_file, "wt");
+    FILE *destination = fopen (output_file, "wt");
 
     for (int i = 0; i < file_text->lines_num; i++)
     {

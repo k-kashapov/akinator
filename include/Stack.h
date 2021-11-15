@@ -86,9 +86,8 @@ uint64_t StackDump (stack_t *stk, uint64_t err, const char *called_from, const i
 
 unsigned long MurmurHash (const void *stk, unsigned long len);
 
-uint64_t StackInit_ (stack_t *stk, const char *file_name = NULL,                \
-                    const char *func_name = NULL, const int line = -1,          \
-                    const char *name = NULL);
+uint64_t StackInit_ (stack_t *stk
+                     DEBUG_DATA (, const char *file_name, const char *func_name, const int line, const char *name));
 
 uint64_t StackDtor (stack_t *stk);
 

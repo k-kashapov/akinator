@@ -60,12 +60,13 @@ TNode *AddNodeRight (TNode *node, tree_elem value)
 
 void TreeNodePrint (TNode *node)
 {
-    printf (TYPE_SPEC"\n", node->data);
+    printf (TYPE_SPEC, node->data);
     return;
 }
 
 TNode *VisitNodePre (TNode *node, void (*action) (TNode *))
 {
+    printf ("(");
     if (!node) return 0;
     action (node);
     if (node->left)
@@ -78,6 +79,7 @@ TNode *VisitNodePre (TNode *node, void (*action) (TNode *))
         VisitNodePre (node->right, action);
     }
 
+    printf (")");
     return 0;
 }
 

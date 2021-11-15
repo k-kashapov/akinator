@@ -66,9 +66,9 @@ struct File_info
 long int read_all_lines (File_info *info, const char *file_name);
 
 /**
- * \brief Пробует открыть файл.
+ * \brief Читает файл до конца, возвращает указатель на буфер текста
  */
-int open_file (FILE **ptr, const char* file_name, const char* mode);
+char *read_file (const char *file_name);
 
 /**
  * \brief Читает файл, помещает все символы в буфер
@@ -109,3 +109,5 @@ void free_info (File_info *info);
  * \param current Структура, хранящая имена файлов
  */
 void get_params (int argc, const char **argv, Config *current);
+
+int get_io_args (int argc, const char **argv, Config *curr_config);
