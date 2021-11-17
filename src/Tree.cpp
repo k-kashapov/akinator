@@ -66,19 +66,27 @@ void TreeNodePrint (TNode *node)
     return;
 }
 
-TNode *VisitNodePre (TNode *node, void (*action) (TNode *))
+TNode *VisitNode (TNode *node, NodeAction pre, NodeAction in, NodeAction post)
 {
     if (!node) return 0;
-    action (node);
+
+    if (pre)
+        pre(node);
+
     if (node->left)
     {
-        VisitNodePre (node->left, action);
+        VisitNode (node->left, pre, in, post);
     }
 
+    if (in)
+        in (node);
     if (node->right)
     {
-        VisitNodePre (node->right, action);
+        VisitNode (node->right, pre, in, post);
     }
+
+    if (post)
+        post (node);
 
     return 0;
 }

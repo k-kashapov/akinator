@@ -22,6 +22,8 @@ struct Tree
     long size;
 };
 
+typedef void (*NodeAction) (TNode *);
+
 Tree *CreateTree (tree_elem value = NULL);
 
 TNode *GetRoot (Tree *tree);
@@ -34,7 +36,7 @@ TNode *AddNodeRight (TNode *node, tree_elem value);
 
 void TreeNodePrint (TNode *node);
 
-TNode *VisitNodePre (TNode *node, void (*action) (TNode *));
+TNode *VisitNode (TNode *node, NodeAction pre, NodeAction in, NodeAction post);
 
 int64_t TreeOk (Tree *tree);
 

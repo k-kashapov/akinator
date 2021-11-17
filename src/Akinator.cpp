@@ -230,7 +230,7 @@ void SaveBase (Config *config, Tree *tree)
 {
     New_base = OpenFile (config->output_file);
 
-    VisitNodePre (GetRoot (tree), PrintDataToFile);
+    VisitNode (GetRoot (tree), PrintDataToFile, NULL, NULL);
 
     fclose (New_base);
 
@@ -250,7 +250,7 @@ void CreateImg (Tree *tree)
     fprintf (Graph_file, "digraph\n{\nrankdir = \"TB\";\n"
                          "splines = true;\n");
 
-    VisitNodePre (GetRoot (tree), PrintNodeDot);
+    VisitNode (GetRoot (tree), PrintNodeDot, NULL, NULL);
 
     fprintf (Graph_file, "\n}");
     fclose (Graph_file);
