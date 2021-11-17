@@ -8,7 +8,7 @@ Tree *CreateTree (tree_elem value)
     Tree *tree = (Tree*) calloc (1, sizeof (Tree));
     if (!tree)
     {
-        LOG_ERROR ("OPEN_FILE_FAIL\n");
+        LOG_ERROR ("CREATE TREE FAILED\n");
     }
 
     TNode *init_node = CreateNode (value);
@@ -145,5 +145,6 @@ int DestructTree (Tree *tree)
     #ifdef LOGGING
         CloseLogFile (&Log_file);
     #endif
+
     return 0;
 }

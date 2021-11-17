@@ -1,5 +1,12 @@
 #include "Akinator.h"
 
+static FILE *Graph_file  = NULL;
+static FILE *New_base    = NULL;
+
+const  int  MAX_ADDED_NODES = 64;
+static int  Inputs_num      = 0;
+static char *User_inputs[MAX_ADDED_NODES];
+
 int GetArgs (int argc, const char **argv, Config *curr_config)
 {
     while (--argc > 0)
@@ -28,63 +35,62 @@ int GetArgs (int argc, const char **argv, Config *curr_config)
     return 0;
 }
 
-static FILE *OpenGraphFile (const char *name)
+static FILE *OpenFile (const char *name)
 {
     FILE *file_ptr = fopen (name, "w");
     if (!file_ptr)
     {
-        printf ("OPENING GRAPH FILE FAILED\n");
+        printf ("OPENING FILE FAILED\n");
         return NULL;
     }
-    fprintf (file_ptr,  "digraph\n{\nrankdir = \"TB\";\n"
-                        "splines = false;\n");
+
     return file_ptr;
 }
 
-static int PrintNodeDot (FILE *Graph_file, TNode *node)
+void PrintNodeDot (TNode *node)
 {
-    int printed = fprintf (Graph_file,
-                        "NODE%p"
-                        "["
-                            "shape=rectangle, style = \"rounded,filled\", "
-                            "fillcolor=\"%s\", "
-                            "label = \""
-                            "%s\""
-                        "]\n",
-                        node, node->left ? "lightblue" : "lime",
-                        node->data
+    fprintf (Graph_file, "NODE%p"
+            "["
+                "shape=rectangle, style = \"rounded,filled\", "
+                "fillcolor=\"%s\", "
+                "label = \""
+                "%s\""
+            "]\n",
+            node, node->left ? "lightblue" : "lime",
+            node->data
             );
 
-    return printed;
+    LinkTreeNodes (node);
+
+    return;
 }
 
-static int LinkTreeNodes (FILE *Graph_file, TNode *src)
+void LinkTreeNodes (TNode *src)
 {
-    fprintf (Graph_file, "NODE%p:sw->NODE%p:n [label = \"Да\"]\n", src, src->left);
-    fprintf (Graph_file, "NODE%p:se->NODE%p:n [label = \"Нет\"]\n", src, src->right);
+    if (src->left)
+        fprintf (Graph_file, "NODE%p:sw->NODE%p:n [xlabel = \"Да\", "
+                             "minlen = \"2\"]\n", src, src->left);
+    if (src->right)
+        fprintf (Graph_file, "NODE%p:se->NODE%p:n [xlabel = \"Нет\", "
+                             "minlen = \"2\"]\n", src, src->right);
 
-    return 0;
+    return;
 }
 
 int BuildTreeFromFile (Tree *tree, File_info *file)
 {
     TNode *root = GetRoot (tree);
 
-    FILE *Graph_file = OpenGraphFile ("dotInput.dot");
-
     int curr_line = 0;
-
-    CreateQuestion (root, file, &curr_line, Graph_file);
-
-    fprintf (Graph_file, "\n}");
-
-    fclose (Graph_file);
+    CreateQuestion (root, file, &curr_line);
 
     return OK;
 }
 
-int CreateQuestion (TNode *destination, File_info *file, int *curr_line, FILE *Graph_file)
+int CreateQuestion (TNode *destination, File_info *file, int *curr_line)
 {
+    assert (destination);
+
     printf ("\u25BC\u25BC\u25BC\nЧитаем строчку: ");
     String str = *file->strs[(*curr_line)++];
     printf ("%s\n", str.text);
@@ -95,16 +101,9 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line, FILE *G
         printf ("Это вопрос => создаём двух потомков:\n");
         destination->left = CreateNode ("");
         destination->right = CreateNode ("");
-        PrintNodeDot (Graph_file, destination);
 
-        CreateQuestion (destination->left,  file, curr_line, Graph_file);
-        CreateQuestion (destination->right, file, curr_line, Graph_file);
-
-        LinkTreeNodes (Graph_file, destination);
-    }
-    else
-    {
-        PrintNodeDot (Graph_file, destination);
+        CreateQuestion (destination->left,  file, curr_line);
+        CreateQuestion (destination->right, file, curr_line);
     }
 
     printf ("Построение закончено (%s)\n\u25B2\u25B2\u25B2\n", str.text);
@@ -114,11 +113,17 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line, FILE *G
 
 char *GetUserInput (void)
 {
-    char *user_input = (char *) calloc (MAX_USER_INPUT, sizeof (char));
+    char *user_input = (char *) calloc (MAX_USER_INPUT + 2, sizeof (char));
     fgets (user_input, MAX_USER_INPUT, stdin);
-    if (user_input[MAX_USER_INPUT - 2] != '\0')
+
+    if (user_input[MAX_USER_INPUT - 3] != '\0')
     {
+        user_input[MAX_USER_INPUT - 3] = '\0';
         while (getchar() != '\n') ;
+    }
+    else
+    {
+        *strchr (user_input, '\n') = '\0';
     }
 
     return user_input;
@@ -127,7 +132,13 @@ char *GetUserInput (void)
 char UserAgrees (void)
 {
     char *input = GetUserInput();
-    char agrees = *input == 'y';
+    while (*input == '\0')
+    {
+        free (input);
+        input = GetUserInput();
+    }
+
+    char agrees = (*input == 'y');
     free (input);
 
     return agrees;
@@ -140,7 +151,14 @@ int Guess (Tree *tree)
     printf ("Let's dance!\n");
     for (TNode *curr = GetRoot (tree); curr;)
     {
-        printf ("Это %s\n", curr->data);
+        if (curr->left)
+        {
+            printf ("Answer this:\n\t%s\n\t", curr->data);
+        }
+        else
+        {
+            printf ("I guess, that's\n\t%s\n\t", curr->data);
+        }
         char agrees = UserAgrees();
         if (agrees)
         {
@@ -162,7 +180,7 @@ int Guess (Tree *tree)
             }
             else
             {
-                printf ("Тогда не знаю\n");
+                AddObject (curr);
                 break;
             }
         }
@@ -171,28 +189,84 @@ int Guess (Tree *tree)
     return OK;
 }
 
+int AddObject (TNode *source)
+{
+    AddNodeRight (source, source->data);
+
+    printf ("Who was that?\n\t");
+    char *input = GetUserInput ();
+
+    User_inputs[Inputs_num++] = input;
+    if (Inputs_num >= MAX_ADDED_NODES - 1)
+    {
+        printf ("Too many nodes added, save the base and restart the game please\n");
+    }
+
+    AddNodeLeft (source, input);
+
+    printf ("What's the difference between %s and %s?\n\t", input, source->data);
+
+    input = GetUserInput ();
+    unsigned long input_len = strlen (input);
+
+    input[input_len] = '?';
+    input[input_len + 1] = '\0';
+
+    printf ("Добавляем в базу...\n");
+
+    User_inputs[Inputs_num++] = input;
+    if (Inputs_num >= MAX_ADDED_NODES)
+    {
+        printf ("Too many nodes added, save the base and restart the game please\n");
+        Inputs_num -= 1;
+    }
+
+    source->data = input;
+
+    return OK;
+}
+
 void SaveBase (Config *config, Tree *tree)
 {
-    int stdout_old = fileno (stdout);
-    freopen (config->output_file, "wt", stdout);
+    New_base = OpenFile (config->output_file);
 
     VisitNodePre (GetRoot (tree), PrintDataToFile);
-    fclose (stdout);
 
-    stdout = fdopen (stdout_old, "wt");
+    fclose (New_base);
 
     return;
 }
 
 void PrintDataToFile (TNode *node)
 {
-    fprintf (stdout, "%s\n", node->data);
+    fprintf (New_base, "%s\n", node->data);
     return;
 }
 
-void CreateImg (void)
+void CreateImg (Tree *tree)
 {
+    Graph_file = OpenFile ("dotInput.dot");
+
+    fprintf (Graph_file, "digraph\n{\nrankdir = \"TB\";\n"
+                         "splines = true;\n");
+
+    VisitNodePre (GetRoot (tree), PrintNodeDot);
+
+    fprintf (Graph_file, "\n}");
+    fclose (Graph_file);
+
     system ("dot dotInput.dot -Tpng -o Tree.png");
     system ("eog Tree.png");
+
+    return;
+}
+
+void FreeInputs (void)
+{
+    for (int input = 0; input < Inputs_num; input++)
+    {
+        free (User_inputs[input]);
+    }
+
     return;
 }

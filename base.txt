@@ -1,3 +1,15 @@
-Животное?
-    Человек
-    Растение
+Human?
+    Gushin?
+        Why
+        USA?
+            Trump
+            Maybe vse taki Gushin?
+                Gushin
+                Putin
+    Animal?
+        Poltorashka
+        Plant?
+            Vegetable?
+                Ovosch
+                Apple
+            Gribi

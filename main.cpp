@@ -19,20 +19,33 @@ int main (int argc, const char **argv)
 
     BuildTreeFromFile (tree, &info);
 
-    Guess (tree);
-
-    if (config.settings & UPDATE_BASE)
+    while (true)
     {
-        SaveBase (&config, tree);
+        Guess (tree);
+
+        printf ("Wanna see the base?\n\t");
+        if (UserAgrees())
+        {
+            CreateImg(tree);
+        }
+
+        printf ("Wanna save the base?\n\t");
+        if (UserAgrees())
+        {
+            SaveBase (&config, tree);
+        }
+
+        printf ("Play again?\n\t");
+        if (!UserAgrees())
+        {
+            printf ("Commencing self-destruct\n");
+            break;
+        }
     }
 
     DestructTree (tree);
+    FreeInputs ();
     free_info (&info);
-
-    if (config.settings & DOT_IMG)
-    {
-        CreateImg();
-    }
 
     return 0;
 }
