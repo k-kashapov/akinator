@@ -19,18 +19,6 @@ int main (int argc, const char **argv)
 
     BuildTreeFromFile (tree, &info);
 
-    stack_t stk = {};
-    StackInit_ (&stk);
-
-    TNode *found = FindByData ("Шкрек", tree, &stk);
-
-    for (int i = 1; i < stk.size; i++)
-    {
-        printf ("data [%d] = %s\n", i, ((TNode *)stk.buffer[i])->data);
-    }
-
-    StackDtor (&stk);
-
     while (true)
     {
         Guess (tree);
