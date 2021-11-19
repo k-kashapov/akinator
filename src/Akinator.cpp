@@ -100,6 +100,7 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line)
 
     if (str.text[str.len - 1] == '?')
     {
+        str.text[str.len - 1] = '\0';
         printf ("That's a question => creating two children:\n");
         destination->left = CreateNode ("");
         destination->right = CreateNode ("");
@@ -128,8 +129,6 @@ char *GetUserInput (void)
         *strchr (user_input, '\n') = '\0';
     }
 
-    printf ("%s\n", user_input);
-
     return user_input;
 }
 
@@ -157,7 +156,7 @@ int Guess (Tree *tree)
     {
         if (curr->left)
         {
-            printf ("Answer this:\n\t%s\n\t", curr->data);
+            printf ("Answer this:\n\t%s?\n\t", curr->data);
         }
         else
         {
@@ -172,7 +171,7 @@ int Guess (Tree *tree)
             }
             else
             {
-                printf ("Очев\n");
+                printf ("Ochev\n");
                 break;
             }
         }
@@ -197,9 +196,7 @@ TNode *SearchNode (const char *key, TNode *node, stack_t *stk)
 {
     StackPush (stk, (type_t)node);
 
-    printf ("key = %s; data = %s\n", key, node->data);
-
-    if (!strcmp (key, node->data))
+    if (!strcmp (key, node->data) && !(node->left))
     {
         return node;
     }
@@ -235,10 +232,110 @@ TNode *FindByData (const char *key, Tree *tree, stack_t *stk)
     TNode *result = SearchNode (key, GetRoot (tree), stk);
     if (result)
     {
-        printf ("result = %p\n", result);
         return result;
     }
 
+    return NULL;
+}
+
+TNode *GetDefinition (Tree *tree)
+{
+    printf ("Enter a name:\n\t");
+    char *key = GetUserInput();
+
+    stack_t stk = {};
+
+    StackInit_ (&stk);
+
+    TNode *found = FindByData (key, tree, &stk);
+
+    if (!found)
+    {
+        printf ("%s not found!\n", key);
+        StackDtor (&stk);
+        free (key);
+        return NULL;
+    }
+
+    printf ("%s is ", key);
+
+    for (long item = 1; item < stk.size - 2; item++)
+    {
+        TNode *current = (TNode *) stk.buffer[item];
+        TNode *next    = (TNode *) stk.buffer[item + 1];
+        int   is_child = (current->left == next);
+        printf ("%s%s, ", is_child ? "" : "not ", current->data);
+    }
+
+    TNode *current = (TNode *) stk.buffer[stk.size - 2];
+    TNode *next    = (TNode *) stk.buffer[stk.size - 1];
+    int   is_child = (current->left == next);
+
+    printf ("and %s%s\n", is_child ? "" : "not ", current->data);
+
+    StackDtor (&stk);
+    free (key);
+
+    return found;
+}
+
+TNode *Compare (Tree *tree)
+{
+    printf ("Enter first name:\n\t");
+    char *key = GetUserInput();
+
+    stack_t stk1 = {};
+
+    StackInit_ (&stk1);
+
+    TNode *found1 = FindByData (key, tree, &stk1);
+    if (!found1)
+    {
+        printf ("%s not found!\n", key);
+        StackDtor (&stk1);
+        free (key);
+        return NULL;
+    }
+    free (key);
+
+    printf ("Enter second name:\n\t");
+    key = GetUserInput();
+
+    stack_t stk2 = {};
+
+    StackInit_ (&stk2);
+
+    TNode *found2 = FindByData (key, tree, &stk2);
+    if (!found2)
+    {
+        printf ("%s not found!\n", key);
+        StackDtor (&stk1);
+        StackDtor (&stk2);
+        free (key);
+        return NULL;
+    }
+    free (key);
+
+    for (long item = 1; item < stk1.size - 1 && item < stk2.size - 1; item++)
+    {
+        if (stk2.buffer[item] != stk1.buffer[item])
+        {
+            printf ("%s and %s are different, because %s is %s and %s is %s\n",
+                    found1->data, found2->data, found1->data,
+                    ((TNode *)stk1.buffer[item])->data, found2->data,
+                    ((TNode *)stk2.buffer[item])->data
+                    );
+        }
+        else
+        {
+            printf ("%s and %s are both %s\n",
+                    found1->data, found2->data,
+                    ((TNode *) stk1.buffer[item])->data);
+        }
+    }
+
+    StackDtor (&stk1);
+    StackDtor (&stk2);
     return NULL;
 }
 
@@ -269,8 +366,7 @@ int AddObject (TNode *source)
     input = GetUserInput();
     unsigned long input_len = strlen (input);
 
-    input[input_len] = '?';
-    input[input_len + 1] = '\0';
+    input[input_len] = '\0';
 
     printf ("Adding to base...\n");
 
@@ -294,7 +390,7 @@ void SaveBase (Config *config, Tree *tree)
 
 void PrintDataToFile (TNode *node)
 {
-    fprintf (New_base, "%s\n", node->data);
+    fprintf (New_base, "%s%s\n", node->data, node->left ? "?" : "");
     return;
 }
 

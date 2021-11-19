@@ -228,7 +228,7 @@ uint64_t StackResize (stack_t *stk, long new_capacity)
 
         *(uint64_t *)(stk->buffer + new_capacity) = canary;
     #else
-        int buff_len = new_capacity * sizeof (type_t);
+        size_t buff_len = (size_t) new_capacity * sizeof (type_t);
 
         REALLOC (stk->buffer, stk->capacity, buff_len, type_t);
     #endif

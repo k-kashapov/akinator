@@ -21,15 +21,38 @@ int main (int argc, const char **argv)
 
     while (true)
     {
-        Guess (tree);
+        printf ("Pick an option:\n\t1) Guess\n\t2) Definiton\n\t3) Compare\n\t");
+        char *input = GetUserInput();
 
-        printf ("Wanna see the base?\n\t");
+        if (!input)
+        {
+            printf ("INVALID INPUT\n");
+            return -1;
+        }
+
+        switch (*input)
+        {
+            case 49: // ASCII code '1'
+                Guess (tree);
+                break;
+            case 50: // ASCII code '2'
+                GetDefinition (tree);
+                break;
+            case 51: // ASCII code '3'
+                Compare (tree);
+                break;
+            default:
+                printf ("No such option\n");
+        }
+        free (input);
+
+        printf ("Do you want to see the base?\n\t");
         if (UserAgrees())
         {
             CreateImg(tree);
         }
 
-        printf ("Wanna save the base?\n\t");
+        printf ("Do you want to save the base?\n\t");
         if (UserAgrees())
         {
             SaveBase (&config, tree);

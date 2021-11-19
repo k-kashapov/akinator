@@ -20,6 +20,10 @@ TNode *SearchNode (const char *key, TNode *node, stack_t *stk);
 
 TNode *FindByData (const char *key, Tree *tree, stack_t *stk);
 
+TNode *GetDefinition (Tree *tree);
+
+TNode *Compare (Tree *tree);
+
 int AddObject (TNode *source);
 
 void SaveBase (Config *config, Tree *tree);
