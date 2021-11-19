@@ -1,11 +1,13 @@
 #include "Akinator.h"
+#include <stdarg.h>
 
 static FILE *Graph_file  = NULL;
 static FILE *New_base    = NULL;
 
-static size_t  Inputs_capacity = 2;
-static size_t  Inputs_num      = 0;
-static char    **User_inputs   = NULL;
+#define DOWN_ARROWS "\u25BC\u25BC\u25BC"
+#define UP_ARROWS   "\u25B2\u25B2\u25B2"
+
+int meowprintf (const char* format, ...);
 
 int GetArgs (int argc, const char **argv, Config *curr_config)
 {
@@ -77,23 +79,11 @@ void LinkTreeNodes (TNode *src)
     return;
 }
 
-int BuildTreeFromFile (Tree *tree, File_info *file)
-{
-    TNode *root = GetRoot (tree);
-
-    int curr_line = 0;
-    CreateQuestion (root, file, &curr_line);
-
-    User_inputs = (char **) calloc (Inputs_capacity, sizeof (char **));
-
-    return OK;
-}
-
 int CreateQuestion (TNode *destination, File_info *file, int *curr_line)
 {
     assert (destination);
 
-    printf ("\u25BC\u25BC\u25BC\nReading a line: ");
+    printf (DOWN_ARROWS "\nReading a line: ");
     String str = *file->strs[(*curr_line)++];
     printf ("%s\n", str.text);
     destination->data = str.text;
@@ -109,7 +99,7 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line)
         CreateQuestion (destination->right, file, curr_line);
     }
 
-    printf ("Build complete (%s)\n\u25B2\u25B2\u25B2\n", str.text);
+    printf ("Build complete (%s)\n" UP_ARROWS "\n", str.text);
 
     return OK;
 }
@@ -141,7 +131,7 @@ char UserAgrees (void)
         input = GetUserInput();
     }
 
-    char agrees = (*input == 'y');
+    char agrees = (*input == 'y' || strncmp (input, "д", 3));
     free (input);
 
     return agrees;
@@ -156,11 +146,14 @@ int Guess (Tree *tree)
     {
         if (curr->left)
         {
-            printf ("Answer this:\n\t%s?\n\t", curr->data);
+            meowprintf ("The question is:\n\t%s?\n\t", curr->data);
         }
         else
         {
             printf ("I guess, that's\n\t%s\n\t", curr->data);
+            char command[100] = {};
+            sprintf (command, "espeak -s 90 -vru \"I guess that's  %s\"", curr->data);
+            system (command);
         }
         char agrees = UserAgrees();
         if (agrees)
@@ -172,6 +165,7 @@ int Guess (Tree *tree)
             else
             {
                 printf ("Ochev\n");
+                system ("espeak -vru \"Ochev\"");
                 break;
             }
         }
@@ -190,6 +184,24 @@ int Guess (Tree *tree)
     }
 
     return OK;
+}
+
+int meowprintf (const char* format, ...)
+{
+    char command[100] = "espeak -vru \"";
+
+    va_list arg = {};
+    va_start (arg, format);
+    vsprintf (command + strlen (command), format, arg);
+    va_end (arg);
+
+    va_start (arg, format);
+    vprintf (format, arg);
+    va_end (arg);
+
+    strcat (command, "\"");
+
+    return system (command);
 }
 
 TNode *SearchNode (const char *key, TNode *node, stack_t *stk)
@@ -320,11 +332,12 @@ TNode *Compare (Tree *tree)
     {
         if (stk2.buffer[item] != stk1.buffer[item])
         {
-            printf ("%s and %s are different, because %s is %s and %s is %s\n",
+            printf ("%s and %s, we are not the same. %s is %s and %s is %s\n",
                     found1->data, found2->data, found1->data,
                     ((TNode *)stk1.buffer[item])->data, found2->data,
                     ((TNode *)stk2.buffer[item])->data
                     );
+            break;
         }
         else
         {
@@ -337,44 +350,6 @@ TNode *Compare (Tree *tree)
     StackDtor (&stk1);
     StackDtor (&stk2);
     return NULL;
-}
-
-int AddObject (TNode *source)
-{
-    AddNodeRight (source, source->data);
-
-    printf ("Who was that?\n\t");
-    char *input = GetUserInput();
-
-    User_inputs[Inputs_num++] = input;
-    if (Inputs_num >= Inputs_capacity - 1)
-    {
-        char **tmp = (char **) realloc (User_inputs, Inputs_capacity * 2 * sizeof (char **));
-        if (!tmp)
-        {
-            printf ("MEMORY ALLOCATION ERROR");
-            return MEM_ALLOC_ERR;
-        }
-        User_inputs = tmp;
-        Inputs_capacity *= 2;
-    }
-
-    AddNodeLeft (source, input);
-
-    printf ("What's the difference between %s and %s?\n\t", input, source->data);
-
-    input = GetUserInput();
-    unsigned long input_len = strlen (input);
-
-    input[input_len] = '\0';
-
-    printf ("Adding to base...\n");
-
-    User_inputs[Inputs_num++] = input;
-
-    source->data = input;
-
-    return OK;
 }
 
 void SaveBase (Config *config, Tree *tree)
@@ -408,16 +383,6 @@ void CreateImg (Tree *tree)
 
     system ("dot dotInput.dot -Tpng -o Tree.png");
     system ("eog Tree.png");
-
-    return;
-}
-
-void FreeInputs (void)
-{
-    for (size_t input = 0; input < Inputs_num; input++)
-    {
-        free (User_inputs[input]);
-    }
 
     return;
 }
