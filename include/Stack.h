@@ -6,7 +6,7 @@
 #include "Logs.h"
 
 //#define DEBUG_INFO
-#define CANARY_PROTECTION
+//#define CANARY_PROTECTION
 #define CHECK_POISON
 #define HASH_PROTECTION
 

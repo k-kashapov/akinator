@@ -16,6 +16,10 @@ char UserAgrees (void);
 
 int Guess (Tree *tree);
 
+TNode *SearchNode (const char *key, TNode *node, stack_t *stk);
+
+TNode *FindByData (const char *key, Tree *tree, stack_t *stk);
+
 int AddObject (TNode *source);
 
 void SaveBase (Config *config, Tree *tree);

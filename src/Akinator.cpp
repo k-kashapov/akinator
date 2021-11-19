@@ -142,7 +142,7 @@ char UserAgrees (void)
         input = GetUserInput();
     }
 
-    char agrees = (*input == 'y' || *(wchar_t *)input == 'д');
+    char agrees = (*input == 'y');
     free (input);
 
     return agrees;
@@ -191,6 +191,55 @@ int Guess (Tree *tree)
     }
 
     return OK;
+}
+
+TNode *SearchNode (const char *key, TNode *node, stack_t *stk)
+{
+    StackPush (stk, (type_t)node);
+
+    printf ("key = %s; data = %s\n", key, node->data);
+
+    if (!strcmp (key, node->data))
+    {
+        return node;
+    }
+
+    if (node->left)
+    {
+        TNode *result = SearchNode (key, node->left, stk);
+        if (result) return result;
+    }
+
+    if (node->right)
+    {
+        TNode *result = SearchNode (key, node->right, stk);
+        if (result) return result;
+    }
+
+    uint64_t stk_err = 0;
+    StackPop (stk, &stk_err);
+
+    if (stk_err)
+    {
+        printf ("ERROR: Stack POP: %06lx\n", stk_err);
+        return NULL;
+    }
+
+    return NULL;
+}
+
+TNode *FindByData (const char *key, Tree *tree, stack_t *stk)
+{
+    StackPush (stk, 0);
+
+    TNode *result = SearchNode (key, GetRoot (tree), stk);
+    if (result)
+    {
+        printf ("result = %p\n", result);
+        return result;
+    }
+
+    return NULL;
 }
 
 int AddObject (TNode *source)
