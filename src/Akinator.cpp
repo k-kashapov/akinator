@@ -3,9 +3,9 @@
 static FILE *Graph_file  = NULL;
 static FILE *New_base    = NULL;
 
-const  int  MAX_ADDED_NODES = 64;
-static int  Inputs_num      = 0;
-static char *User_inputs[MAX_ADDED_NODES];
+static size_t  Inputs_capacity = 2;
+static size_t  Inputs_num      = 0;
+static char    **User_inputs   = NULL;
 
 int GetArgs (int argc, const char **argv, Config *curr_config)
 {
@@ -84,6 +84,8 @@ int BuildTreeFromFile (Tree *tree, File_info *file)
     int curr_line = 0;
     CreateQuestion (root, file, &curr_line);
 
+    User_inputs = (char **) calloc (Inputs_capacity, sizeof (char **));
+
     return OK;
 }
 
@@ -91,14 +93,14 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line)
 {
     assert (destination);
 
-    printf ("\u25BC\u25BC\u25BC\nЧитаем строчку: ");
+    printf ("\u25BC\u25BC\u25BC\nReading a line: ");
     String str = *file->strs[(*curr_line)++];
     printf ("%s\n", str.text);
     destination->data = str.text;
 
     if (str.text[str.len - 1] == '?')
     {
-        printf ("Это вопрос => создаём двух потомков:\n");
+        printf ("That's a question => creating two children:\n");
         destination->left = CreateNode ("");
         destination->right = CreateNode ("");
 
@@ -106,7 +108,7 @@ int CreateQuestion (TNode *destination, File_info *file, int *curr_line)
         CreateQuestion (destination->right, file, curr_line);
     }
 
-    printf ("Построение закончено (%s)\n\u25B2\u25B2\u25B2\n", str.text);
+    printf ("Build complete (%s)\n\u25B2\u25B2\u25B2\n", str.text);
 
     return OK;
 }
@@ -116,15 +118,17 @@ char *GetUserInput (void)
     char *user_input = (char *) calloc (MAX_USER_INPUT + 2, sizeof (char));
     fgets (user_input, MAX_USER_INPUT, stdin);
 
-    if (user_input[MAX_USER_INPUT - 3] != '\0')
+    if (user_input[MAX_USER_INPUT - 2] != '\0')
     {
-        user_input[MAX_USER_INPUT - 3] = '\0';
+        user_input[MAX_USER_INPUT - 2] = '\0';
         while (getchar() != '\n') ;
     }
     else
     {
         *strchr (user_input, '\n') = '\0';
     }
+
+    printf ("%s\n", user_input);
 
     return user_input;
 }
@@ -138,7 +142,7 @@ char UserAgrees (void)
         input = GetUserInput();
     }
 
-    char agrees = (*input == 'y');
+    char agrees = (*input == 'y' || *(wchar_t *)input == 'д');
     free (input);
 
     return agrees;
@@ -194,32 +198,34 @@ int AddObject (TNode *source)
     AddNodeRight (source, source->data);
 
     printf ("Who was that?\n\t");
-    char *input = GetUserInput ();
+    char *input = GetUserInput();
 
     User_inputs[Inputs_num++] = input;
-    if (Inputs_num >= MAX_ADDED_NODES - 1)
+    if (Inputs_num >= Inputs_capacity - 1)
     {
-        printf ("Too many nodes added, save the base and restart the game please\n");
+        char **tmp = (char **) realloc (User_inputs, Inputs_capacity * 2 * sizeof (char **));
+        if (!tmp)
+        {
+            printf ("MEMORY ALLOCATION ERROR");
+            return MEM_ALLOC_ERR;
+        }
+        User_inputs = tmp;
+        Inputs_capacity *= 2;
     }
 
     AddNodeLeft (source, input);
 
     printf ("What's the difference between %s and %s?\n\t", input, source->data);
 
-    input = GetUserInput ();
+    input = GetUserInput();
     unsigned long input_len = strlen (input);
 
     input[input_len] = '?';
     input[input_len + 1] = '\0';
 
-    printf ("Добавляем в базу...\n");
+    printf ("Adding to base...\n");
 
     User_inputs[Inputs_num++] = input;
-    if (Inputs_num >= MAX_ADDED_NODES)
-    {
-        printf ("Too many nodes added, save the base and restart the game please\n");
-        Inputs_num -= 1;
-    }
 
     source->data = input;
 
@@ -263,7 +269,7 @@ void CreateImg (Tree *tree)
 
 void FreeInputs (void)
 {
-    for (int input = 0; input < Inputs_num; input++)
+    for (size_t input = 0; input < Inputs_num; input++)
     {
         free (User_inputs[input]);
     }
